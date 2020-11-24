@@ -1,0 +1,240 @@
+{include file="public/header" /}
+<link rel="stylesheet" type="text/css" href="/static/admin/webupload/webuploader.css">
+<link rel="stylesheet" type="text/css" href="/static/admin/webupload/style.css">
+<link href="/static/admin/css/select2.min.css" rel="stylesheet">
+<!-- 配置文件 -->
+<script type="text/javascript" src="/static/admin/ueditor/ueditor.config.js"></script>
+<!-- 编辑器源码文件 -->
+<script type="text/javascript" src="/static/admin/ueditor/ueditor.all.js"></script>
+<style>
+    .file-item{float: left; position: relative; width: 110px;height: 110px; margin: 0 20px 20px 0; padding: 4px;}
+    .file-item .info{overflow: hidden;}
+    .uploader-list{width: 100%; overflow: hidden;}
+</style>
+<style type="text/css">
+    .laydate-icon {
+        background: transparent !important;
+    }
+</style>
+<body class="gray-bg">
+<div class="wrapper wrapper-content animated fadeInRight" id="app">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>编辑商品</h5>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal" name="edit" id="edit" method="post" action="{:url('editPost')}">
+                        <input type="hidden" name="id" value="{$info.id}">
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">类型<font color='red'>*</font>：</label>
+                            <div class="input-group col-sm-3">
+                                {:getEnumSelectWidget($goodsClassifyEnum, 'classify', '-请选择-', $info['classify'], 1)}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">商品名称<font color='red'>*</font>：</label>
+                            <div class="input-group col-sm-3">
+                                <input id="goods_name" value="{$info.goods_name}" type="text" class="form-control" name="goods_name" >
+                            </div>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">价格（$）<font color='red'>*</font>：</label>
+                            <div class="input-group col-sm-3">
+                                <input id="price" type="text" value="{$info.price}" placeholder="最高支持小数点后2位" class="form-control" name="price" >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">封面图片<font color='red'>*</font>：</label>
+                            <div class="input-group col-sm-3">
+                                <img id="image_url_src" src="{$info.image_url}" width="100px">
+                                <input type="hidden" value="{$info.image_url}" id="image_url" name="image_url" />
+                                <input type="file" name="file" id="file_image_url"
+                                       onchange="uploadImage('image_url_src', 'image_url', 'file_image_url')" class="form-control"/>
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="gallery" name="gallery" value="{$info.gallery}">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">轮播图<font color='red'>*</font>：</label>
+                            <div class="layui-upload">
+                                <button type="button" class="layui-btn" id="multiple_img_upload">选择图片</button>
+                                <blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;">
+                                    轮播图预览：单击图片可删除
+                                    <div class="layui-upload-list" id="div-gallery">
+                                        {foreach $galleryArray as $vo}
+                                        <img src="{$vo}" title="点击删除" height="150px" class="layui-upload-img" onclick="delMultipleImgs(this)">
+                                        {/foreach}
+                                    </div>
+                                </blockquote>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">排序：</label>
+                            <div class="input-group col-sm-4">
+                                <input id="sort" value="{$info.sort}" type="number" class="form-control" name="sort" placeholder="越小越靠前，默认0" >
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+                        <div class="form-group">
+                            <div class="col-sm-4 col-sm-offset-3">
+                                <button id="formSubmit" type="button" class="btn btn-primary"><i class="fa fa-save"></i> 保存</button>&nbsp;&nbsp;&nbsp;
+                                <a class="btn btn-danger" href="javascript:history.go(-1);"><i class="fa fa-close"></i> 返回</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{include file="public/footer" /}
+<script type="text/javascript" src="/static/admin/webupload/webuploader.min.js"></script>
+<script type="text/javascript" src="/static/admin/js/common.js"></script>
+<script src="/static/admin/js/select2.full.min.js"></script>
+<script src="/static/admin/js/ajaxfileupload.js"></script>
+
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入样式 -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script type="text/javascript">
+
+
+    let app = new Vue({
+        el: "#app",
+        data: {
+            dialogVisible: false,
+            selectedLoading: false,
+        },
+        methods: {
+
+        }
+    });
+
+
+    function uploadImage(img, formInput, fileInput) {
+        $.ajaxFileUpload({
+            url: "/admin/upload/uploadImage", //用于文件上传的服务器端请求地址
+            secureuri: false, //是否需要安全协议，一般设置为false
+            fileElementId: fileInput, //文件上传域的ID
+            dataType: 'json', //返回值类型 一般设置为json
+            data: "{}",
+            success: function (data, status)  //服务器成功响应处理函数
+            {
+                console.log(data);
+                if (data['code'] != 200) {
+                    layer.msg(data['msg']);
+                    return false;
+                }
+                $("#" + img).attr("src", data['data']['url']);
+                $("#" + formInput).val(data['data']['url']);
+                console.log(data['data']['url'])
+            },
+            error: function (data, status, e)//服务器响应失败处理函数
+            {
+                console.log(e);
+            }
+        })
+    }
+
+    $(function(){
+
+        $('#formSubmit').click(function() {
+            if(common.isNullOrEmpty($('#classify').val())){
+                layer.msg('请选择类型',{icon:2,time:1500,shade: 0.1}, function(index){
+                    layer.close(index);
+                });
+                return false;
+            }
+            if(common.isNullOrEmpty($('#goods_name').val())){
+                layer.msg('请输入商品名称',{icon:2,time:1500,shade: 0.1}, function(index){
+                    layer.close(index);
+                });
+                return false;
+            }
+            if(common.isNullOrEmpty($('#price').val())){
+                layer.msg('请输入价格',{icon:2,time:1500,shade: 0.1}, function(index){
+                    layer.close(index);
+                });
+                return false;
+            }
+            if(common.isNullOrEmpty($('#image_url').val())){
+                layer.msg('请上传封面图片',{icon:2,time:1500,shade: 0.1}, function(index){
+                    layer.close(index);
+                });
+                return false;
+            }
+            if(common.isNullOrEmpty($('#gallery').val())){
+                layer.msg('请上传轮播图片',{icon:2,time:1500,shade: 0.1}, function(index){
+                    layer.close(index);
+                });
+                return false;
+            }
+
+            $("form#edit").submit();
+        });
+    });
+
+    layui.use('upload', function () {
+        var upload = layui.upload;
+        //多图片上传
+        upload.render({
+            elem: '#multiple_img_upload'
+            , url: '/admin/upload/uploadImage'
+            , multiple: true
+            , done: function (res) {
+                //如果上传成功
+                if (res.code == 200) {
+                    //追加图片成功追加文件名至图片容器
+                    gallery_images.push(res.data.url);
+                    $('#gallery').val(gallery_images);
+                    $('#div-gallery').append('<img src="' + res.data.url
+                        + '" title="点击删除" height="150px" class="layui-upload-img" onclick="delMultipleImgs(this)">')
+                } else {
+                    //提示信息
+                    dialog.tip(res.message);
+                }
+            }
+        });
+
+    });
+
+    //单击图片删除图片 【注册全局函数】
+    function delMultipleImgs(this_img) {
+        //获取下标
+        var subscript = $("#div-gallery img").index(this_img);
+        //删除图片
+        this_img.remove();
+        //删除数组
+        gallery_images.splice(subscript, 1);
+        //重新排序
+        gallery_images.sort();
+        $('#gallery').val(gallery_images);
+        //console.log("multiple_images",multiple_images);
+        //返回
+        return;
+    }
+
+    //多图容器 【注册全局变量】
+    var gallery_images = [];
+    {foreach $galleryArray as $vo}
+        gallery_images.push('{$vo}');
+    {/foreach}
+
+
+</script>
+</body>
+</html>
