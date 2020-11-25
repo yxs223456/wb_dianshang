@@ -58,6 +58,7 @@ class GoodsService extends Base
             "image_url" => $info["image_url"],
             "price" => (string) $info["price"],
             "gallery" => $gallery,
+            "introduction" => $info["introduction"],
             "description" => $description,
         ];
         return $returnData;

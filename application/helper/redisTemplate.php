@@ -147,3 +147,24 @@ function getDemandSign($userId, \Redis $redis) {
     return $redis->get($key);
 }
 
+/**
+ * 物流缓存
+ */
+define("REDIS_KEY_ORDER_EXPRESS", REDIS_KEY_PREFIX . "orderExpress:");
+//缓存物流信息， 有效期5分钟
+function cacheOrderExpress($orderId, array $expressInfo, $ttl, \Redis $redis)
+{
+    $key = REDIS_KEY_ORDER_EXPRESS . $orderId;
+    $redis->setex($key, $ttl, json_encode($expressInfo));
+}
+
+//获取物流信息
+function getOrderExpress($orderId, \Redis $redis)
+{
+    $key = REDIS_KEY_ORDER_EXPRESS . $orderId;
+    $data = $redis->get($key);
+    if ($data) {
+        return json_decode($data, true);
+    }
+    return null;
+}

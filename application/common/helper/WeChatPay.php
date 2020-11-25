@@ -114,6 +114,25 @@ class WeChatPay
 
     }
 
+    public function parseNotice()
+    {
+        //获取通知的数据
+        $xml = isset($GLOBALS['HTTP_RAW_POST_DATA']) ? $GLOBALS['HTTP_RAW_POST_DATA'] : file_get_contents("php://input");
+        if (empty($xml)) {
+            # 如果没有数据，直接返回失败
+            return false;
+        }
+
+        //验证签名
+        try {
+            $notice = $this->xmlToArray($xml);
+            $this->checkSign($notice);
+            return $notice;
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
     protected function wxPost($xml, $url, $second = 10, $useCert = false, $certPem = '', $keyPem = '')
     {
 
@@ -215,6 +234,20 @@ class WeChatPay
         //签名步骤四：所有字符转为大写
         $result = strtoupper($string);
         return $result;
+    }
+
+    private function checkSign(array $data)
+    {
+        if (empty($data['sign'])) {
+            throw new \Exception("签名错误！");
+        }
+        $mchConfig = $this->getWxMchConfigByAppId();
+        $sign = $this->createSign($data, $mchConfig["key"]);
+        if ($data["sign"] == $sign) {
+            //签名正确
+            return true;
+        }
+        throw new \Exception("签名错误！");
     }
 
     protected function ToUrlParams($arr)

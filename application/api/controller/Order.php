@@ -53,4 +53,23 @@ class Order extends Base
         $returnData = $service->pay($user, $orderId);
         return $this->jsonResponse($returnData);
     }
+
+    public function list()
+    {
+        $pageNum = input("page_num", 1);
+        $pageSize = input("page_size", 10);
+        $orderStatus = input("order_status", 0);
+
+        if (!checkInt($pageNum, false) || !checkInt($pageSize, false)) {
+            AppException::factory(AppException::COM_PARAMS_ERR);
+        }
+        if (!checkInt($orderStatus, true, true)) {
+            AppException::factory(AppException::COM_PARAMS_ERR);
+        }
+
+        $user = $this->query["user"];
+        $service = new OrderService();
+        $returnData = $service->list($user, $orderStatus, $pageNum, $pageSize);
+        return $this->jsonResponse($returnData);
+    }
 }
