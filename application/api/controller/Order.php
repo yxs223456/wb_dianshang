@@ -72,4 +72,42 @@ class Order extends Base
         $returnData = $service->list($user, $orderStatus, $pageNum, $pageSize);
         return $this->jsonResponse($returnData);
     }
+
+    public function info()
+    {
+        $orderId = input("o_id");
+
+        if (!checkInt($orderId, false)) {
+            AppException::factory(AppException::COM_PARAMS_ERR);
+        }
+
+        $user = $this->query["user"];
+        $service = new OrderService();
+        $returnData = $service->info($user, $orderId);
+        return $this->jsonResponse($returnData);
+    }
+
+    public function appraise()
+    {
+        $orderId = input("o_id");
+        $goodsId = input("g_id");
+        $score = (int)input("score");
+        $message = input("message");
+
+
+        if (!checkInt($orderId, false) || !checkInt($goodsId, false)) {
+            AppException::factory(AppException::COM_PARAMS_ERR);
+        }
+        if ($score < 1 || $score > 5) {
+            AppException::factory(AppException::COM_PARAMS_ERR);
+        }
+        if (empty($message)) {
+            AppException::factory(AppException::COM_PARAMS_ERR);
+        }
+
+        $user = $this->query["user"];
+        $service = new OrderService();
+        $returnData = $service->appraise($user, $orderId, $goodsId, $score, $message);
+        return $this->jsonResponse($returnData);
+    }
 }

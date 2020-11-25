@@ -45,6 +45,21 @@ class WeChatPay
         return $result;
     }
 
+    public function jsapi(array $wxUnifiedOrderParams)
+    {
+        $res = $this->wxUnifiedOrder($wxUnifiedOrderParams);
+        $mchConfig = $this->getWxMchConfigByAppId();
+        $res = [
+            "app_id" => $mchConfig["appid"],
+            "time_stamp" => strval(time()),
+            "nonce" => getRandomString(),
+            "package" => "prepay_id=" . $res["prepay_id"],
+            "sign_type" => "MD5",
+        ];
+        $res["sign"] = $this->createSign($res, $mchConfig["key"]);
+        return $res;
+    }
+
     //微信统一下单
     public function wxUnifiedOrder(array $wxUnifiedOrderParams)
     {

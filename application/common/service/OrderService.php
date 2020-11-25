@@ -171,8 +171,8 @@ class OrderService extends Base
             "trade_type" => "JSAPI",
             "openid" => $openid,
         ];
-        $wxPayOrder = $wxPayHelper->wxUnifiedOrder($wxUnifiedOrderParams);
-        return $wxPayOrder;
+        $wxPayParams = $wxPayHelper->jsapi($wxUnifiedOrderParams);
+        return $wxPayParams;
     }
 
     /**
@@ -244,7 +244,7 @@ class OrderService extends Base
         $order = Db::name("goods_order")->alias("go")
             ->leftJoin("express_company ec", "go.express_c_id=ec.id")
             ->where("go.id", $orderId)
-            ->field("go.*,ec.name,ec.kd_100_code")
+            ->field("go.*,ec.name express_company,ec.kd_100_code")
             ->find();
         if (empty($order) || $order["u_id"] != $user["id"]) {
             AppException::factory(AppException::COM_INVALID);
@@ -252,27 +252,56 @@ class OrderService extends Base
 
         $orderGoods = Db::name("goods_order_info")
             ->where("o_id", $orderId)
-            ->field("g_id,g_num,g_name,g_image_url,is_comment")
+            ->field("g_id,g_num,g_name,g_image_url,is_appraise")
             ->select();
 
         $expressInfo = $this->getExpressInfoByOrder($order);
 
+        $returnData = [
+            "o_id" => $orderId,
+            "order_no" => $order["order_no"],
+            "order_status" => $order["order_status"],
+            "total_money" => $order["total_money"],
+            "create_time" => date("m-d H:i:s", $order["create_time"]),
+            "goods" => $orderGoods,
+            "delivery_info" => [
+                "delivery_name" => $order["delivery_name"],
+                "delivery_phone" => $order["delivery_phone"],
+                "delivery_address" => $order["delivery_address"],
+                "express_company" => $order["express_company"] ? $order["express_company"] : "",
+                "express_code" => $order["express_code"],
+                "express_info" => $expressInfo,
+            ],
+            "pay_time" => $order["pay_time"] ? date("m-d H:i:s", $order["pay_time"]) : "",
+            "delivery_time" => $order["delivery_time"] ? date("m-d H:i:s", $order["delivery_time"]) : "",
+            "receive_time" => $order["receive_time"] ? date("m-d H:i:s", $order["receive_time"]) : "",
+        ];
+
+        return $returnData;
     }
 
     public function getExpressInfoByOrder($order)
     {
         $expressInfo = [];
-        if ($order["status"] >= OrderStatusEnum::WAIT_RECEIVE) {
+        if ($order["order_status"] >= OrderStatusEnum::WAIT_RECEIVE) {
             $redis = Redis::factory();
             $expressInfo = getOrderExpress($order["id"], $redis);
             if (empty($expressInfo)) {
                 $kd100Helper = new KuaiDi100();
-                $expressInfo = $kd100Helper->query($order["kd_100_code"], $order["express_code"]);
-                $cacheTtl = $order["status"] == OrderStatusEnum::WAIT_RECEIVE ? 300 : 86400;
-                cacheOrderExpress($order["id"], $expressInfo, $cacheTtl, $redis);
+                $expressInfoQuery = $kd100Helper->query($order["kd_100_code"], $order["express_code"]);
+                if (isset($expressInfoQuery["data"])) {
+                    $expressInfo = $expressInfoQuery["data"];
+                    $cacheTtl = $order["order_status"] == OrderStatusEnum::WAIT_RECEIVE ? 300 : 86400;
+                    cacheOrderExpress($order["id"], $expressInfo, $cacheTtl, $redis);
+                }
             }
         }
         return $expressInfo;
+    }
+
+    public function appraise($user, $orderId, $goodsId, $score, $message)
+    {
+
     }
 }
 

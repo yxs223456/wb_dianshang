@@ -166,5 +166,5 @@ function getOrderExpress($orderId, \Redis $redis)
     if ($data) {
         return json_decode($data, true);
     }
-    return null;
+    return [];
 }
