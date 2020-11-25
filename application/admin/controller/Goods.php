@@ -5,6 +5,7 @@ namespace app\admin\controller;
 use app\common\enum\GoodsClassifyEnum;
 use app\common\enum\IsShowEnum;
 use app\common\model\GoodsModel;
+use app\common\model\GoodsScoreModel;
 use think\Db;
 
 class Goods extends Common {
@@ -56,9 +57,15 @@ class Goods extends Common {
         unset($param["file"]);
 
         $goodsModel = new GoodsModel();
+        $goodsScoreModel = new GoodsScoreModel();
         Db::startTrans();
         try {
             $goodsModel->save($param);
+            $goodsScoreModel->save([
+                "g_id" => $goodsModel->id,
+                "count" => 0,
+                "total_score" => 0,
+            ]);
 
             Db::commit();
 

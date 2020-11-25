@@ -9,6 +9,7 @@
 namespace app\common\service;
 
 use app\common\AppException;
+use app\common\enum\IsAppraiseEnum;
 use app\common\enum\IsPayEnum;
 use app\common\enum\IsShowEnum;
 use app\common\enum\OrderStatusEnum;
@@ -301,7 +302,51 @@ class OrderService extends Base
 
     public function appraise($user, $orderId, $goodsId, $score, $message)
     {
+        $order = Db::name("goods_order")->where("id", $orderId)->find();
+        if (empty($order) || $order["u_id"] != $user["id"]) {
+            AppException::factory(AppException::COM_INVALID);
+        }
+        if ($order["order_status"] != OrderStatusEnum::RECEIVED) {
+            AppException::factory(AppException::COM_INVALID);
+        }
 
+
+        Db::startTrans();
+        try {
+            $orderGoods = Db::name("goods_order_info")
+                ->where("o_id", $orderId)
+                ->where("g_id", $goodsId)
+                ->lock(true)
+                ->find();
+            if ($orderGoods["is_appraise"] == IsAppraiseEnum::YES) {
+                AppException::factory(AppException::COM_INVALID);
+            }
+
+            Db::name("goods_order")->where("id", $orderGoods["id"])
+                ->update([
+                    "is_appraise" => IsAppraiseEnum::YES,
+                    "update_time" => time(),
+                ]);
+
+            Db::name("goods_score")
+                ->where("g_id", $goodsId)
+                ->inc("count", 1)
+                ->inc("total_score", $score)
+                ->update(["update_time" => time()]);
+
+            Db::name("goods_appraises")->insert([
+                "g_id" => $goodsId,
+                "o_id" => $orderId,
+                "u_id" => $user["id"],
+                "score" => $score,
+                "message" => $message,
+            ]);
+            Db::commit();
+        } catch (\Throwable $e) {
+            Db::rollback();
+            throw $e;
+        }
+        return new \stdClass();
     }
 }
 
