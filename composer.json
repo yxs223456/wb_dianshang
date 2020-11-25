@@ -27,7 +27,11 @@
       "ext-json": "*",
       "ext-bcmath": "*",
         "naixiaoxin/think-wechat": "^1.4",
-        "yunify/qingstor-sdk": "^2.2"
+      "yunify/qingstor-sdk": "^2.2",
+      "ext-openssl": "*",
+      "ext-curl": "*",
+      "ext-libxml": "*",
+      "ext-simplexml": "*"
     },
     "autoload": {
         "psr-4": {

@@ -31,6 +31,7 @@ class AppException extends \Exception
     const DEMAND_SUBMIT_FREQUENT = [3000, "缓一缓，您刚刚提交过了"];
 
     const ORDER_GOODS_EMPTY = [4000, "抱歉，商品已下架"];
+    const ORDER_NOT_WAIT_PAY = [4001, "抱歉，订单已经超时"];
 
     public static function factory($errConst)
     {

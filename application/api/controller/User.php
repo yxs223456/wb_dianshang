@@ -7,17 +7,10 @@
  */
 namespace app\api\controller;
 
-use app\admin\service\UserBalanceLogs;
-use app\common\AppException as AE;
-use app\common\enum\UserStatusEnum;
+use app\common\AppException;
 use app\common\helper\MiniProgram;
-use app\common\helper\RabbitMQ;
 use app\common\helper\Redis;
-use app\common\service\User as CSUser;
-use app\common\model\Users as UserModel;
 use app\common\service\UserService;
-use app\constants\Constants;
-use think\Db;
 
 class User extends Base
 {
@@ -32,7 +25,7 @@ class User extends Base
     {
         $code = input('code');
         if (empty($code)) {
-            throw AE::factory(AE::COM_PARAMS_ERR);
+            AppException::factory(AppException::COM_PARAMS_ERR);
         }
 
         //小程序配置
@@ -63,7 +56,7 @@ class User extends Base
         $sessionKeyId = input('session_key_id');
 
         if (empty($sessionKeyId) || empty($encryptedData) || empty($iv)) {
-            throw AE::factory(AE::COM_PARAMS_ERR);
+            AppException::factory(AppException::COM_PARAMS_ERR);
         }
 
         $service = new UserService();
