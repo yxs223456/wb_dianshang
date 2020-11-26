@@ -30,8 +30,8 @@ class MiniProgram
             return [];
         }
         return [
-            "unionId" => $mcrypt_decrypt["unionId"]??"",
-            "openId" => $mcrypt_decrypt["openId"]??"",
+            "unionId" => $mcrypt_decrypt["unionId"] ?? null,
+            "openId" => $mcrypt_decrypt["openId"] ?? null,
             "nickname" => $mcrypt_decrypt["nickName"]??"",
             "province" => $mcrypt_decrypt["province"]??"",
             "country" => $mcrypt_decrypt["country"]??"",
