@@ -25,7 +25,7 @@ class MiniProgram
      */
     public static function getUserInfo($sessionKey, $encryptedData, $iv)
     {
-        $mcrypt_decrypt = self::getWxInfoToArray($encryptedData, $sessionKey, $iv);
+        $mcrypt_decrypt = self::getWxInfoToArray($sessionKey, $encryptedData, $iv);
         if ($mcrypt_decrypt == []) {
             return [];
         }
