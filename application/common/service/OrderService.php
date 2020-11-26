@@ -104,8 +104,14 @@ class OrderService extends Base
                     "update_time" => $now,
                 ];
             }
-            // 纪录未支付订单表
             Db::name("goods_order_info")->insertAll($goodsOrderInfo);
+
+            // 纪录未支付订单表
+            Db::name("tmp_wait_pay_order")->insert([
+                "o_id" => $orderInfo["id"],
+                "create_time" => $now,
+                "update_time" => $now,
+            ]);
 
             Db::commit();
         } catch (\Throwable $e) {
@@ -357,18 +363,10 @@ class OrderService extends Base
             AppException::factory(AppException::COM_INVALID);
         }
 
-        Db::startTrans();
-        try {
-            $order->order_status = OrderStatusEnum::CANCEL;
-            $order->save();
+        $order->order_status = OrderStatusEnum::CANCEL;
+        $order->save();
 
-            Db::name("tmp_wait_pay_order")->where("o_id", $orderId)->delete();
-
-            Db::commit();
-        } catch (\Throwable $e) {
-            Db::rollback();
-            throw $e;
-        }
+        Db::name("tmp_wait_pay_order")->where("o_id", $orderId)->delete();
 
         return new \stdClass();
     }
@@ -384,6 +382,8 @@ class OrderService extends Base
         $order->order_status = OrderStatusEnum::RECEIVED;
         $order->receive_time = time();
         $order->save();
+
+        Db::name("tmp_wait_receive_order")->where("o_id", $orderId)->delete();
 
         return new \stdClass();
     }

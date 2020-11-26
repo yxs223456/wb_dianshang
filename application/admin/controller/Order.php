@@ -84,7 +84,6 @@ class Order extends Common {
         $this->assign('list',$list);
 
         return $this->fetch();
-
     }
 
     /**
@@ -127,44 +126,7 @@ class Order extends Common {
         $this->assign('list',$list);
 
         return $this->fetch();
-
     }
-
-
-    /**
-     * 订单详情
-     */
-    public function detail()
-    {
-        $id = input('param.id');
-        $result = Db::name("orders")->where("id", $id)->find();
-        $result["status_desc"] = OrderStatusEnum::getEnumDescByValue($result["status"]);
-
-        $result["goods_money"] = usdtFormat($result["goods_money"]);
-        $result["delivery_money"] = usdtFormat($result["delivery_money"]);
-        $result["total_money"] = usdtFormat($result["total_money"]);
-        $result["real_total_money"] = usdtFormat($result["real_total_money"]);
-        $result["usdt_amount"] = usdtFormat($result["usdt_amount"]);
-        $result["diamond_coin_amount"] = diamondCoinFormat($result["diamond_coin_amount"]);
-
-        $result["receive_date"] = $result["receive_time"] ? date("Y-m-d H:i:s", $result["receive_time"]) : "--";
-        $result["delivery_date"] = $result["delivery_time"] ? date("Y-m-d H:i:s", $result["delivery_time"]) : "--";
-        $result["express_company_name"] = "--";
-        $result["express_code"] = $result["express_code"] ? $result["express_code"] :"--";
-        if (!empty($result["express_company_uuid"])) {
-            $expressCompany = Db::name("express_company")
-                ->where("uuid", $result["express_company_uuid"])
-                ->find();
-            if ($expressCompany) {
-                $result["express_company_name"] = $expressCompany["name"];
-            }
-        }
-
-        $this->assign("info", $result);
-        return $this->fetch();
-
-    }
-
 
     /**
      * 编辑订单物流操作页面
@@ -193,18 +155,33 @@ class Order extends Common {
 
         $param = input('post.');
         $orderModel = new GoodsOrderModel();
+        $order = $orderModel->findById($param["id"]);
 
-        $param["order_status"] = OrderStatusEnum::WAIT_RECEIVE;
-        $param["delivery_time"] = time();
-
+        Db::startTrans();
         try{
 
-            $orderModel->updateByIdAndData($param["id"], $param);
+            if ($order["order_status"] == OrderStatusEnum::WAIT_DELIVERY) {
+                // 纪录未收货订单表
+                Db::name("tmp_wait_receive_order")->insert([
+                    "o_id" => $param["id"],
+                    "create_time" => time(),
+                    "update_time" => time(),
+                ]);
+                $order->order_status = OrderStatusEnum::WAIT_RECEIVE;
+                $order->delivery_time = time();
+            }
+
+            $order->express_c_id = $param["express_c_id"];
+            $order->express_code = $param["express_code"];
+
+            $order->save();
+            Db::commit();
 
             $this->success("编辑物流成功",url("waitDelivery"));
 
         } catch(PDOException $e) {
             $this->error($e->getMessage());
+            Db::rollback();
         }
 
     }
