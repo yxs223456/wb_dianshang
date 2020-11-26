@@ -8,6 +8,8 @@
 
 namespace app\common\helper;
 
+use think\facade\Log;
+
 /** 微信小程序相关封装
  * Class MiniProgram
  * @package app\common\helper
@@ -65,6 +67,7 @@ class MiniProgram
         $code2Session = curl($url);
         $code2Session = json_decode($code2Session, true);
         if (empty($code2Session) || !isset($code2Session['session_key'])) {
+            Log::write(json_encode($code2Session, JSON_UNESCAPED_UNICODE), "error");
             return [];
         }
         return $code2Session;
