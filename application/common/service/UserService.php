@@ -37,7 +37,8 @@ class UserService extends Base
             $userId = $user["id"];
             $this->updateUserInfoByMp($userId, $mpUserInfo, $redis);
         }
-
+        var_dump($user);
+        var_dump($userId);
         $returnData = $this->userFormat($userId, $redis);
         return $returnData;
     }
