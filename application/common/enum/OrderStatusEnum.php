@@ -15,7 +15,6 @@ class OrderStatusEnum
 {
     use EnumTrait;
 
-    const TIMEOUT = -2;
     const CANCEL = -1;
     const WAIT_PAY = 0;
     const WAIT_DELIVERY = 1;
@@ -23,9 +22,6 @@ class OrderStatusEnum
     const RECEIVED = 3;
 
     protected static $desc = [
-        self::TIMEOUT => [
-            "cn" => "超时",
-        ],
         self::CANCEL => [
             "cn" => "取消",
         ],

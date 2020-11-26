@@ -110,4 +110,32 @@ class Order extends Base
         $returnData = $service->appraise($user, $orderId, $goodsId, $score, $message);
         return $this->jsonResponse($returnData);
     }
+
+    public function cancel()
+    {
+        $orderId = input("o_id");
+
+        if (!checkInt($orderId, false)) {
+            AppException::factory(AppException::COM_PARAMS_ERR);
+        }
+
+        $user = $this->query["user"];
+        $service = new OrderService();
+        $returnData = $service->cancel($user, $orderId);
+        return $this->jsonResponse($returnData);
+    }
+
+    public function received()
+    {
+        $orderId = input("o_id");
+
+        if (!checkInt($orderId, false)) {
+            AppException::factory(AppException::COM_PARAMS_ERR);
+        }
+
+        $user = $this->query["user"];
+        $service = new OrderService();
+        $returnData = $service->received($user, $orderId);
+        return $this->jsonResponse($returnData);
+    }
 }

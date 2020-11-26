@@ -193,8 +193,7 @@ class OrderService extends Base
         $order = Db::name("goods_order")->where("id", $orderId)->find();
 
         if ($order["order_status"] == OrderStatusEnum::WAIT_PAY ||
-            $order["order_status"] == OrderStatusEnum::CANCEL ||
-            $order["order_status"] == OrderStatusEnum::TIMEOUT) {
+            $order["order_status"] == OrderStatusEnum::CANCEL) {
             Db::name("goods_order")->where("id", $orderId)->update([
                 "order_status" => OrderStatusEnum::WAIT_DELIVERY,
                 "pay_time" => $payTime,
@@ -202,6 +201,8 @@ class OrderService extends Base
                 "pay_order_no" => $payOrderNo,
                 "update_time" => time(),
             ]);
+
+            Db::name("tmp_wait_pay_order")->where("o_id", $orderId)->delete();
         }
     }
 
@@ -310,7 +311,6 @@ class OrderService extends Base
             AppException::factory(AppException::COM_INVALID);
         }
 
-
         Db::startTrans();
         try {
             $orderGoods = Db::name("goods_order_info")
@@ -346,6 +346,45 @@ class OrderService extends Base
             Db::rollback();
             throw $e;
         }
+        return new \stdClass();
+    }
+
+    public function cancel($user, $orderId)
+    {
+        $orderModel = new GoodsOrderModel();
+        $order = $orderModel->findById($orderId);
+        if (empty($order) || $order["u_id"] != $user["id"]) {
+            AppException::factory(AppException::COM_INVALID);
+        }
+
+        Db::startTrans();
+        try {
+            $order->order_status = OrderStatusEnum::CANCEL;
+            $order->save();
+
+            Db::name("tmp_wait_pay_order")->where("o_id", $orderId)->delete();
+
+            Db::commit();
+        } catch (\Throwable $e) {
+            Db::rollback();
+            throw $e;
+        }
+
+        return new \stdClass();
+    }
+
+    public function received($user, $orderId)
+    {
+        $orderModel = new GoodsOrderModel();
+        $order = $orderModel->findById($orderId);
+        if (empty($order) || $order["u_id"] != $user["id"]) {
+            AppException::factory(AppException::COM_INVALID);
+        }
+
+        $order->order_status = OrderStatusEnum::RECEIVED;
+        $order->receive_time = time();
+        $order->save();
+
         return new \stdClass();
     }
 }
