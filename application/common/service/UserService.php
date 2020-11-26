@@ -24,6 +24,9 @@ class UserService extends Base
 
         //从微信获取用户信息
         $mpUserInfo = MiniProgram::getUserInfo($sessionKey, $encryptedData, $iv);
+        if (empty($mpUserInfo)) {
+            AppException::factory(AppException::WECHAT_GET_USER_INFO_ERR);
+        }
 
         //使用unionid作为用户唯一标识
         $userModel = new UserModel();
