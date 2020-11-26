@@ -10,4 +10,6 @@
 // +----------------------------------------------------------------------
 
 return [
+    "app\command\WaitPayOrderTimeout",
+    "app\command\WaitReceiveOrderReceived",
 ];

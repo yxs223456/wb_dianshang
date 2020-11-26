@@ -363,8 +363,10 @@ class OrderService extends Base
             AppException::factory(AppException::COM_INVALID);
         }
 
-        $order->order_status = OrderStatusEnum::CANCEL;
-        $order->save();
+        if ($order["order_status"] == OrderStatusEnum::WAIT_PAY) {
+            $order->order_status = OrderStatusEnum::CANCEL;
+            $order->save();
+        }
 
         Db::name("tmp_wait_pay_order")->where("o_id", $orderId)->delete();
 
