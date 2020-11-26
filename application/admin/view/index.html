@@ -27,15 +27,17 @@
                 {if !empty($menu)}
                     {foreach name="menu" item="vo"}
                     <li class="menu">
-                        <a href="{$vo.href}" id="">
+                        <a href="{$vo.href}" id="{$vo.id}">
                             <i class="{$vo.css}"></i>
                             <span class="nav-label">{$vo.title} </span>
+                            <span id="dh_{$vo.id}" class=""></span>
                         </a>
                         <ul class="nav nav-second-level">
                             {if !empty($vo['child'])}
                                 {foreach name="$vo['child']" item="v"}
                                 <li>
-                                    <a class="J_menuItem" href="{$v.href}">{$v.title}</a>
+                                    <a class="J_menuItem" href="{$v.href}">{$v.title}<span id="dh_{$v.id}"
+                                                                                           class=""></span></a>
                                 </li>
                                 {/foreach}
                             {/if}
@@ -215,6 +217,32 @@ $(function(){
         })
     });      
 });
+
+function clockOrderInfo() {
+    $.ajax({
+        url: "/admin/base/clockOrderInfo", //用于文件上传的服务器端请求地址
+        secureuri: false, //是否需要安全协议，一般设置为false
+        dataType: 'json', //返回值类型 一般设置为json
+        success: function (data, status)  //服务器成功响应处理函数
+        {
+            $("#dh_266").addClass("label label-success");
+            $("#dh_267").addClass("label label-success");
+            $("#dh_268").addClass("label label-success");
+
+            $("#dh_266").html(data['wait_delivery']);
+            $("#dh_267").html(data['wait_delivery']);
+            $("#dh_268").html(data['wait_receive']);
+        },
+        error: function (data, status, e)//服务器响应失败处理函数
+        {
+            console.log(e);
+        }
+    })
+}
+
+window.onload(clockOrderInfo());
+setInterval(clockOrderInfo, 5000);
+
 </script>
 </body>
 </html>
