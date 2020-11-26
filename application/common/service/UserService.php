@@ -132,8 +132,7 @@ class UserService extends Base
         if (empty($user)) {
             $userModel = new UserModel();
             $user = $userModel->findById($userId);
-            var_dump($user);
-            if (empty($uesr)) {
+            if (empty($user)) {
                 AppException::factory(AppException::USER_NOT_EXISTS);
             }
             $user = $user->toArray();
