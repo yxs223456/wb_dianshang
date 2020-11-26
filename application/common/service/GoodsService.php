@@ -52,6 +52,17 @@ class GoodsService extends Base
         } else {
             $description = explode(",", $info["description"]);
         }
+        $goodsAppraises = Db::name("goods_appraises")->alias("ga")
+            ->leftJoin("user_info ui", "ga.u_id=ui.u_id")
+            ->where("ga.g_id", $goodsId)
+            ->field("ga.score,ga.message,ga.create_time,
+            ui.nickname,ui.portrait")
+            ->order("ga.id", "desc")
+            ->limit(2)
+            ->select();
+        foreach ($goodsAppraises as $key => $goodsAppraise) {
+            $goodsAppraises[$key]["create_time"] = date("Y-m-d H:i", $goodsAppraise["create_time"]);
+        }
         $returnData = [
             "g_id" => $info["id"],
             "goods_name" => $info["goods_name"],
@@ -60,6 +71,7 @@ class GoodsService extends Base
             "gallery" => $gallery,
             "introduction" => $info["introduction"],
             "description" => $description,
+            "appraises" => $goodsAppraises,
         ];
         return $returnData;
     }
