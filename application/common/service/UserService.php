@@ -37,8 +37,7 @@ class UserService extends Base
             $userId = $user["id"];
             $this->updateUserInfoByMp($userId, $mpUserInfo, $redis);
         }
-        var_dump($user);
-        var_dump($userId);
+
         $returnData = $this->userFormat($userId, $redis);
         return $returnData;
     }
@@ -133,6 +132,7 @@ class UserService extends Base
         if (empty($user)) {
             $userModel = new UserModel();
             $user = $userModel->findById($userId);
+            var_dump($user);
             if (empty($uesr)) {
                 AppException::factory(AppException::USER_NOT_EXISTS);
             }
