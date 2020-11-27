@@ -47,11 +47,7 @@ class CartService extends Base
         $cart->g_num = $goodsNum;
         $cart->save();
 
-        $returnData = [
-            "c_id" => $cartId,
-            "num" => $goodsNum,
-        ];
-        return $returnData;
+        return new \stdClass();
     }
 
     public function delete($user, $cartId)
