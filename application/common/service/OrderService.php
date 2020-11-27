@@ -164,6 +164,7 @@ class OrderService extends Base
             "scene_id" => $order["id"],
             "out_trade_no" => $orderTradeNo,
             "is_pay" => IsPayEnum::NO,
+            "amount" => $order["total_money"],
             "create_time" => $now,
             "update_time" => $now,
         ]);

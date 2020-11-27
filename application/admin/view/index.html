@@ -225,10 +225,6 @@ function clockOrderInfo() {
         dataType: 'json', //返回值类型 一般设置为json
         success: function (data, status)  //服务器成功响应处理函数
         {
-            $("#dh_266").addClass("label label-success");
-            $("#dh_267").addClass("label label-success");
-            $("#dh_268").addClass("label label-success");
-
             $("#dh_266").html(data['wait_delivery']);
             $("#dh_267").html(data['wait_delivery']);
             $("#dh_268").html(data['wait_receive']);
@@ -240,7 +236,12 @@ function clockOrderInfo() {
     })
 }
 
-window.onload(clockOrderInfo());
+$(document).ready(function () {
+    $("#dh_266").addClass("label label-success");
+    $("#dh_267").addClass("label label-success");
+    $("#dh_268").addClass("label label-success");
+    clockOrderInfo();
+});
 setInterval(clockOrderInfo, 5000);
 
 </script>
