@@ -28,7 +28,7 @@ class Cart extends Base
         $user = $this->query["user"];
         $service = new CartService();
         $returnData = $service->add($user, $goodsId, $goodsNum);
-        $this->jsonResponse($returnData);
+        return $this->jsonResponse($returnData);
     }
 
     public function setNum()
@@ -42,7 +42,7 @@ class Cart extends Base
         $user = $this->query["user"];
         $service = new CartService();
         $returnData = $service->setNum($user, $cartId, $goodsNum);
-        $this->jsonResponse($returnData);
+        return $this->jsonResponse($returnData);
     }
 
     public function delete()
@@ -55,7 +55,7 @@ class Cart extends Base
         $user = $this->query["user"];
         $service = new CartService();
         $returnData = $service->delete($user, $cartId);
-        $this->jsonResponse($returnData);
+        return $this->jsonResponse($returnData);
     }
 
     public function all()
@@ -63,6 +63,6 @@ class Cart extends Base
         $user = $this->query["user"];
         $service = new CartService();
         $returnData = $service->all($user);
-        $this->jsonResponse($returnData);
+        return $this->jsonResponse($returnData);
     }
 }
