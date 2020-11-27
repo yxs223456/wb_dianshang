@@ -138,7 +138,7 @@ define("REDIS_KEY_DEMAND_SIGN", REDIS_KEY_PREFIX . "demandSign:");
 // 纪录用户提交标记，有效期5秒
 function addDemandSign($userId, \Redis $redis) {
     $key = REDIS_KEY_DEMAND_SIGN . $userId;
-    $redis->set($key, 1);
+    $redis->setex($key, 5, 1);
 }
 
 // 获取用户提交标记
