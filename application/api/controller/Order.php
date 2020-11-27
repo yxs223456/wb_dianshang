@@ -63,7 +63,7 @@ class Order extends Base
         if (!checkInt($pageNum, false) || !checkInt($pageSize, false)) {
             AppException::factory(AppException::COM_PARAMS_ERR);
         }
-        if (!checkInt($orderStatus, true, true)) {
+        if (!checkInt($orderStatus, true, false)) {
             AppException::factory(AppException::COM_PARAMS_ERR);
         }
 
