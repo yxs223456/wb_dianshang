@@ -59,10 +59,23 @@
                         <div class="form-group">
                             <label class="col-sm-3 control-label">轮播图<font color='red'>*</font>：</label>
                             <div class="layui-upload">
-                                <button type="button" class="layui-btn" id="multiple_img_upload">选择图片</button>
+                                <button type="button" class="layui-btn" id="multiple_img_upload_gallery">选择图片</button>
                                 <blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;">
                                     轮播图预览：单击图片可删除
                                     <div class="layui-upload-list" id="div-gallery"></div>
+                                </blockquote>
+                            </div>
+                        </div>
+
+                        <input type="hidden" id="description" name="description" value="">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">商品介绍<font color='red'>*</font>：</label>
+                            <div class="layui-upload">
+                                <button type="button" class="layui-btn" id="multiple_img_upload_description">选择图片
+                                </button>
+                                <blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;">
+                                    轮播图预览：单击图片可删除
+                                    <div class="layui-upload-list" id="div-description"></div>
                                 </blockquote>
                             </div>
                         </div>
@@ -199,11 +212,12 @@
 
     //多图容器 【注册全局变量】
     var gallery_images = [];
+    var description_images = [];
     layui.use('upload', function () {
         var upload = layui.upload;
         //多图片上传
         upload.render({
-            elem: '#multiple_img_upload'
+            elem: '#multiple_img_upload_gallery'
             ,url: '/admin/upload/uploadImage'
             ,multiple: true
             ,done: function(res){
@@ -213,8 +227,27 @@
                     gallery_images.push(res.data.url);
                     $('#gallery').val(gallery_images);
                     $('#div-gallery').append('<img src="'+ res.data.url
-                        +'" title="点击删除" height="150px" class="layui-upload-img" onclick="delMultipleImgs(this)">')
+                        + '" title="点击删除" height="150px" class="layui-upload-img" onclick="delMultipleImgs(this, ' + "'gallery'" + ')">')
                 }else {
+                    //提示信息
+                    dialog.tip(res.message);
+                }
+            }
+        });
+
+        upload.render({
+            elem: '#multiple_img_upload_description'
+            , url: '/admin/upload/uploadImage'
+            , multiple: true
+            , done: function (res) {
+                //如果上传成功
+                if (res.code == 200) {
+                    //追加图片成功追加文件名至图片容器
+                    description_images.push(res.data.url);
+                    $('#description').val(description_images);
+                    $('#div-description').append('<img src="' + res.data.url
+                        + '" title="点击删除" height="150px" class="layui-upload-img" onclick="delMultipleImgs(this, ' + "'description'" + ')">')
+                } else {
                     //提示信息
                     dialog.tip(res.message);
                 }
@@ -224,19 +257,24 @@
     });
 
     //单击图片删除图片 【注册全局函数】
-    function delMultipleImgs(this_img){
-        //获取下标
-        var subscript=$("#div-gallery img").index(this_img);
-        //删除图片
-        this_img.remove();
-        //删除数组
-        gallery_images.splice(subscript, 1);
-        //重新排序
-        gallery_images.sort();
-        $('#gallery').val(gallery_images);
-        //console.log("multiple_images",multiple_images);
-        //返回
-        return ;
+    function delMultipleImgs(this_img, container) {
+        if (container === "gallery") {
+            //获取下标
+            var subscript = $("#div-gallery img").index(this_img);
+            //删除图片
+            this_img.remove();
+            //删除数组
+            gallery_images.splice(subscript, 1);
+            //重新排序
+            gallery_images.sort();
+            $('#gallery').val(gallery_images);
+        } else if (container === "description") {
+            var subscript = $("#div-description img").index(this_img);
+            this_img.remove();
+            description_images.splice(subscript, 1);
+            description_images.sort();
+            $('#gallery').val(description_images);
+        }
     }
 
 

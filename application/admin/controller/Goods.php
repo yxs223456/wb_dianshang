@@ -91,6 +91,9 @@ class Goods extends Common {
         $galleryArray = $goods->gallery ? explode(",", $goods->gallery) : [];
         $this->assign("galleryArray", $galleryArray);
 
+        $descriptionArray = $goods->description ? explode(",", $goods->description) : [];
+        $this->assign("descriptionArray", $descriptionArray);
+
         $goodsClassifyEnum = GoodsClassifyEnum::getAllList();
         $this->assign("goodsClassifyEnum", $goodsClassifyEnum);
 
@@ -120,7 +123,7 @@ class Goods extends Common {
     }
 
     /**
-     * 平台钻石上下架
+     * 上下架
      */
     public function operateIsShow()
     {

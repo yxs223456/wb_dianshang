@@ -20,7 +20,7 @@ class DemandIsCallEnum
 
     protected static $desc = [
         self::NO => [
-            "cn" => "没处理",
+            "cn" => "未处理",
         ],
         self::YES => [
             "cn" => "已处理",
